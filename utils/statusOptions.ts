@@ -51,3 +51,20 @@ export  const getStatusConfig = (status: string) => {
 }
 
   
+
+  export const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'planning':
+        return 'Planning'
+      case 'booked':
+        return 'Booked'
+      case 'in_progress':
+        return 'In Progress'
+      case 'completed':
+        return 'Completed'
+      case 'cancelled':
+        return 'Cancelled'
+      default:
+        return 'Unknown'
+    }
+  }

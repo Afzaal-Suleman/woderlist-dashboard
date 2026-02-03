@@ -15,8 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import {  changeStatusWithNotification } from "@/server/status-change"
-import {statusConfig, getStatusConfig } from "@/utils/agencyStatusOptions"
+import { changeStatusWithNotification } from "@/server/status-change"
+import { statusConfig, getStatusConfig } from "@/utils/agencyStatusOptions"
 
 export type AgencyFromDB = {
   id: number
@@ -43,8 +43,8 @@ interface AgenciesDataTableProps {
   onRefresh?: () => void
 }
 
-export function AgenciesDataTable({ 
-  data, 
+export function AgenciesDataTable({
+  data,
   totalCount = 0,
   initialPage = 0,
   initialPageSize = 10,
@@ -54,7 +54,7 @@ export function AgenciesDataTable({
 }: AgenciesDataTableProps) {
 
   // Add view modal state
-     const [agencyModal, setAgencyModal] = useState<{
+  const [agencyModal, setAgencyModal] = useState<{
     isOpen: boolean
     userId: string | null
   }>({
@@ -62,15 +62,15 @@ export function AgenciesDataTable({
     userId: null
   })
 
-   const [statusModal, setStatusModal] = useState<{
-      isOpen: boolean
-      agency: AgencyForTable | null
-      newStatus: string | null
-    }>({
-      isOpen: false,
-      agency: null,
-      newStatus: null
-    })
+  const [statusModal, setStatusModal] = useState<{
+    isOpen: boolean
+    agency: AgencyForTable | null
+    newStatus: string | null
+  }>({
+    isOpen: false,
+    agency: null,
+    newStatus: null
+  })
   const [loading, setLoading] = useState(false)
 
   const [agencies, setAgencies] = useState<AgencyForTable[]>(
@@ -119,22 +119,22 @@ export function AgenciesDataTable({
     setAgencies(agencies.filter(a => a.id !== agency.id))
   }
 
-   // Function to open view modal
-    const openViewModal = (agency: AgencyForTable) => {
-      setAgencyModal({
-        isOpen: true,
-        userId:  agency?.id.toString()
-      })
-    }
-      // Close view modal
-    const closeAgencyModal = () => {
-      setAgencyModal({
-        isOpen: false,
-        userId: null
-      })
-    }
+  // Function to open view modal
+  const openViewModal = (agency: AgencyForTable) => {
+    setAgencyModal({
+      isOpen: true,
+      userId: agency?.id.toString()
+    })
+  }
+  // Close view modal
+  const closeAgencyModal = () => {
+    setAgencyModal({
+      isOpen: false,
+      userId: null
+    })
+  }
 
-      // Handle dropdown selection
+  // Handle dropdown selection
   const handleStatusSelect = (pkg: AgencyForTable, newStatus: string) => {
     if (pkg.status === newStatus) return
 
@@ -212,7 +212,7 @@ export function AgenciesDataTable({
     })
   }
 
-    // Enhanced columns with dropdown
+  // Enhanced columns with dropdown
   const enhancedColumns = agencyColumns.map((col: any) => {
     if (col?.accessorKey === "status") {
       return {
@@ -264,42 +264,42 @@ export function AgenciesDataTable({
   return (
     <div className="space-y-4">
 
-    <DataTable<AgencyForTable>
-      data={agencies}
-      columns={enhancedColumns}
-      title="Travel Agencies"
-      description="Manage your travel agency partners"
-      addButtonLabel="Add Agency"
-      onAddNew={handleAddAgency}
-      onEdit={handleEditAgency}
-      onDelete={handleDeleteAgency}
-      onpenViewModal={openViewModal}
-      
-      // Pagination props
-      serverSidePagination={serverSidePagination}
-      totalCount={totalCount}
-      initialPage={initialPage}
-      initialPageSize={initialPageSize}
-      onPageChange={onPageChange}
-    />
+      <DataTable<AgencyForTable>
+        data={agencies}
+        columns={enhancedColumns}
+        title="Travel Agencies"
+        description="Manage your travel agency partners"
+        addButtonLabel="Add Agency"
+        onAddNew={handleAddAgency}
+        onEdit={handleEditAgency}
+        onDelete={handleDeleteAgency}
+        onpenViewModal={openViewModal}
 
-          {/* Agency Profile Modal */}
+        // Pagination props
+        serverSidePagination={serverSidePagination}
+        totalCount={totalCount}
+        initialPage={initialPage}
+        initialPageSize={initialPageSize}
+        onPageChange={onPageChange}
+      />
+
+      {/* Agency Profile Modal */}
       <AgencyProfileViewModal
         isOpen={agencyModal.isOpen}
         onClose={closeAgencyModal}
         userId={agencyModal.userId}
-        // onStatusChange={handleStatusChange}
+      // onStatusChange={handleStatusChange}
       />
 
-       <StatusChangeModal
-              isOpen={statusModal.isOpen}
-              onClose={closeStatusModal}
-              onConfirm={confirmStatusChange}
-              package={statusModal.agency}
-              newStatus={statusModal.newStatus}
-              loading={loading}
-            />
-      </div>
+      <StatusChangeModal
+        isOpen={statusModal.isOpen}
+        onClose={closeStatusModal}
+        onConfirm={confirmStatusChange}
+        package={statusModal.agency}
+        newStatus={statusModal.newStatus}
+        loading={loading}
+      />
+    </div>
 
   )
 }

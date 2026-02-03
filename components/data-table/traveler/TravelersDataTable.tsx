@@ -4,7 +4,7 @@ import { DataTable } from "@/components/data-table"
 import { agencyColumns } from "@/components/data-table/agency/agency-columns"
 import { useState, useEffect } from "react"
 import { Traveler } from "@/types/traveler"
-
+import { TravelerProfileViewModal } from "./traveler-view-modal"
 export type TravelerForTable = Traveler & {
   status?: string
   target?: string
@@ -21,14 +21,22 @@ interface TravelerDataTableProps {
   onPageChange?: (page: number, pageSize: number) => void
 }
 
-export function TravelersDataTable({ 
-  data, 
+export function TravelersDataTable({
+  data,
   totalCount = 0,
   initialPage = 0,
   initialPageSize = 10,
   serverSidePagination = false,
-  onPageChange 
+  onPageChange
 }: TravelerDataTableProps) {
+
+  const [agencyModal, setAgencyModal] = useState<{
+    isOpen: boolean
+    userId: string | null
+  }>({
+    isOpen: false,
+    userId: null
+  })
   const [travelers, setTravelers] = useState<TravelerForTable[]>(
     data.map(agency => ({
       ...agency,
@@ -75,23 +83,46 @@ export function TravelersDataTable({
     setTravelers(travelers.filter(a => a.id !== agency.id))
   }
 
+  // Function to open view modal
+  const openViewModal = (agency: TravelerForTable) => {
+    setAgencyModal({
+      isOpen: true,
+      userId: agency?.id.toString()
+    })
+  }
+  // Close view modal
+  const closeAgencyModal = () => {
+    setAgencyModal({
+      isOpen: false,
+      userId: null
+    })
+  }
   return (
-    <DataTable<TravelerForTable>
-      data={travelers}
-      columns={agencyColumns}
-      title="travelers"
-      description="Manage your travel agency partners"
-      addButtonLabel="Add Travelers"
-      onAddNew={handleAddAgency}
-      onEdit={handleEditAgency}
-      onDelete={handleDeleteAgency}
-      
-      // Pagination props
-      serverSidePagination={serverSidePagination}
-      totalCount={totalCount}
-      initialPage={initialPage}
-      initialPageSize={initialPageSize}
-      onPageChange={onPageChange}
-    />
+    <div className="space-y-4">
+      <DataTable<TravelerForTable>
+        data={travelers}
+        columns={agencyColumns}
+        title="travelers"
+        description="Manage your travel agency partners"
+        addButtonLabel="Add Travelers"
+        onAddNew={handleAddAgency}
+        onEdit={handleEditAgency}
+        onDelete={handleDeleteAgency}
+        onpenViewModal={openViewModal}
+
+        // Pagination props
+        serverSidePagination={serverSidePagination}
+        totalCount={totalCount}
+        initialPage={initialPage}
+        initialPageSize={initialPageSize}
+        onPageChange={onPageChange}
+      />
+      <TravelerProfileViewModal
+        isOpen={agencyModal.isOpen}
+        onClose={closeAgencyModal}
+        userId={agencyModal.userId}
+      // onStatusChange={handleStatusChange}
+      />
+    </div>
   )
 }

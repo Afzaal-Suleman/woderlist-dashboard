@@ -20,7 +20,8 @@ import {
   IconLifebuoy,
   IconCreditCard,
   IconBroadcast,
-  IconPackage
+  IconPackage,
+  IconHeart
 } from "@tabler/icons-react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -73,6 +74,11 @@ const data = {
       title: "Packages",
       url: "/dashboard/packages",
       icon: IconPackage,
+    },
+    {
+      title: "Whishlist",
+      url: "/dashboard/whishlist",
+      icon: IconHeart,
     },
     {
       title: "Support",
