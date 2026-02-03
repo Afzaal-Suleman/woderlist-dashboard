@@ -18,6 +18,7 @@ interface TravelerDataTableProps {
   initialPage?: number
   initialPageSize?: number
   serverSidePagination?: boolean
+  loadApiData?: boolean
   onPageChange?: (page: number, pageSize: number) => void
 }
 
@@ -27,7 +28,8 @@ export function TravelersDataTable({
   initialPage = 0,
   initialPageSize = 10,
   serverSidePagination = false,
-  onPageChange
+  onPageChange,
+  loadApiData
 }: TravelerDataTableProps) {
 
   const [agencyModal, setAgencyModal] = useState<{
@@ -104,11 +106,12 @@ export function TravelersDataTable({
         columns={agencyColumns}
         title="travelers"
         description="Manage your travel agency partners"
-        addButtonLabel="Add Travelers"
-        onAddNew={handleAddAgency}
+        // addButtonLabel="Add Travelers"
+        // onAddNew={handleAddAgency}
         onEdit={handleEditAgency}
         onDelete={handleDeleteAgency}
         onpenViewModal={openViewModal}
+        loadApiData={loadApiData}
 
         // Pagination props
         serverSidePagination={serverSidePagination}

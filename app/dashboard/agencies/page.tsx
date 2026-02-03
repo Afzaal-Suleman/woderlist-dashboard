@@ -82,7 +82,7 @@ import { useEffect, useState } from "react";
 export default function Page() {
   const [agencies, setAgencies] = useState<any>([]);
   const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loadApiData, setLoading] = useState(false);
 
   const loadData = async (page: number, pageSize: number) => {
     console.log("Loading page:", page, "size:", pageSize);
@@ -119,6 +119,7 @@ export default function Page() {
             totalCount={totalCount}
             serverSidePagination={true}
             onPageChange={handlePageChange}
+            loadApiData={loadApiData}
           />
         </div>
       </div>

@@ -12,7 +12,7 @@ export default function Page() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadApiData, setIsLoading] = useState(false);
 
   useEffect(() => {
     loadAgencies(currentPage, pageSize);
@@ -62,6 +62,7 @@ export default function Page() {
             initialPageSize={pageSize}
             serverSidePagination={true}
             onPageChange={handlePageChange}
+            loadApiData={loadApiData}
           />
          
         </div>

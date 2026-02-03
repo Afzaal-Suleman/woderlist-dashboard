@@ -39,6 +39,7 @@ interface AgenciesDataTableProps {
   initialPage?: number
   initialPageSize?: number
   serverSidePagination?: boolean
+  loadApiData?:boolean
   onPageChange?: (page: number, pageSize: number) => void
   onRefresh?: () => void
 }
@@ -51,6 +52,7 @@ export function AgenciesDataTable({
   serverSidePagination = false,
   onPageChange,
   onRefresh,
+  loadApiData,
 }: AgenciesDataTableProps) {
 
   // Add view modal state
@@ -269,8 +271,8 @@ export function AgenciesDataTable({
         columns={enhancedColumns}
         title="Travel Agencies"
         description="Manage your travel agency partners"
-        addButtonLabel="Add Agency"
-        onAddNew={handleAddAgency}
+        // addButtonLabel="Add Agency"
+        // onAddNew={handleAddAgency}
         onEdit={handleEditAgency}
         onDelete={handleDeleteAgency}
         onpenViewModal={openViewModal}
@@ -281,6 +283,7 @@ export function AgenciesDataTable({
         initialPage={initialPage}
         initialPageSize={initialPageSize}
         onPageChange={onPageChange}
+        loadApiData={loadApiData}
       />
 
       {/* Agency Profile Modal */}

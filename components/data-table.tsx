@@ -132,6 +132,7 @@ interface DataTableProps<T extends { id: UniqueIdentifier }> {
   title?: string
   description?: string
   enableDragAndDrop?: boolean
+  loadApiData?:boolean
   enableColumnSelection?: boolean
   onAddNew?: () => void
   onEdit?: (item: T) => void
@@ -159,6 +160,7 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
   onDelete,
   onpenViewModal,
   addButtonLabel = "Add Item",
+  loadApiData,
   
   // Pagination props
   serverSidePagination = false,
@@ -493,7 +495,7 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
                   ))}
                 </TableHeader>
                 <TableBody className="**:data-[slot=table-cell]:first:w-8">
-                  {isLoading ? (
+                  {isLoading || loadApiData ? (
                     <TableRow>
                       <TableCell colSpan={columnsWithFeatures.length} className="h-24 text-center">
                         <div className="flex items-center justify-center gap-2">

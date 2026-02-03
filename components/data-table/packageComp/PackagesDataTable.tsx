@@ -27,6 +27,7 @@ interface PackagesDataTableProps {
   initialPage?: number
   initialPageSize?: number
   serverSidePagination?: boolean
+  loadApiData?: boolean
   onPageChange?: (page: number, pageSize: number) => void
   onRefresh?: () => void
 }
@@ -38,7 +39,8 @@ export function PackageDataTable({
   initialPageSize = 10,
   serverSidePagination = false,
   onPageChange,
-  onRefresh
+  onRefresh,
+  loadApiData
 }: PackagesDataTableProps) {
 
   const [statusModal, setStatusModal] = useState<{
@@ -274,7 +276,7 @@ export function PackageDataTable({
         onEdit={handleEditPackage}
         onDelete={handleDeletePackage}
         onpenViewModal={openViewModal}
-        // loading={loading}
+        loadApiData={loadApiData}
         serverSidePagination={serverSidePagination}
         totalCount={totalCount}
         initialPage={initialPage}

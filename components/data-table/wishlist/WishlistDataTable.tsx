@@ -20,6 +20,7 @@ interface WishlistDataTableProps {
   initialPage?: number
   initialPageSize?: number
   serverSidePagination?: boolean
+  loadApiData?: boolean
   onPageChange?: (page: number, pageSize: number) => void
   onEditWishlist?: (wishlistId: string) => void
   onDeleteWishlist?: (wishlistId: string) => void
@@ -32,6 +33,7 @@ export function WishlistDataTable({
   initialPage = 0,
   initialPageSize = 10,
   serverSidePagination = false,
+  loadApiData,
   onPageChange,
   onEditWishlist,
   onDeleteWishlist,
@@ -66,7 +68,7 @@ export function WishlistDataTable({
     )
   }, [data])
 
- 
+
 
   // Function to open view modal
   const openViewModal = (wishlist: WishlistForTable) => {
@@ -108,13 +110,13 @@ export function WishlistDataTable({
   // Handle status change
   const handleStatusChange = (wishlistId: string, newStatus: string) => {
     // Update the status locally
-    setWishlists(prev => prev.map(w => 
-      w.id === wishlistId 
-        ? { 
-            ...w, 
-            status: newStatus as any,
-            statusBadge: getStatusBadge(newStatus)
-          }
+    setWishlists(prev => prev.map(w =>
+      w.id === wishlistId
+        ? {
+          ...w,
+          status: newStatus as any,
+          statusBadge: getStatusBadge(newStatus)
+        }
         : w
     ))
     // You might want to make an API call here
@@ -124,12 +126,12 @@ export function WishlistDataTable({
   // Handle toggle public/private
   const handleTogglePublic = (wishlistId: string, isPublic: boolean) => {
     // Update the privacy status locally
-    setWishlists(prev => prev.map(w => 
-      w.id === wishlistId 
+    setWishlists(prev => prev.map(w =>
+      w.id === wishlistId
         ? { ...w, is_public: isPublic }
         : w
     ))
-    
+
     // Call the callback if provided
     if (onTogglePublic) {
       onTogglePublic(wishlistId, isPublic)
@@ -143,12 +145,13 @@ export function WishlistDataTable({
         columns={getWishlistColumns}
         title="Wishlists"
         description="Manage travel wishlists and dream destinations"
-        addButtonLabel="Add Wishlist"
-        onAddNew={handleAddWishlist}
+        // addButtonLabel="Add Wishlist"
+        // onAddNew={handleAddWishlist}
         onEdit={handleEditWishlist}
         onDelete={handleDeleteWishlist}
         onpenViewModal={openViewModal}
-        
+        loadApiData={loadApiData}
+
         // Pagination props
         serverSidePagination={serverSidePagination}
         totalCount={totalCount}
@@ -156,7 +159,7 @@ export function WishlistDataTable({
         initialPageSize={initialPageSize}
         onPageChange={onPageChange}
       />
-      
+
       <WishlistViewModal
         isOpen={wishlistModal.isOpen}
         onClose={closeWishlistModal}

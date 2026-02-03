@@ -12,7 +12,7 @@ export default function Page() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [isLoading, setIsLoading] = useState(false);
+  const [loadApiData, setIsLoading] = useState(false);
 
   useEffect(() => {
     loadShoutout(currentPage, pageSize);
@@ -46,24 +46,25 @@ export default function Page() {
           <div className="px-4 lg:px-6">
             {/* <ChartAreaInteractive /> */}
           </div>
-          
+
           {/* Option 1: Client-side pagination (default) */}
           {/* <AgenciesDataTable 
             data={agencies} 
             totalCount={totalCount}
           /> */}
-          
+
           {/* Option 2: Server-side pagination */}
-          
-          <PackageDataTable 
-            data={shoutout} 
+
+          <PackageDataTable
+            data={shoutout}
             totalCount={totalCount}
             initialPage={currentPage - 1}
             initialPageSize={pageSize}
             serverSidePagination={true}
             onPageChange={handlePageChange}
+            loadApiData={loadApiData}
           />
-         
+
         </div>
       </div>
     </div>

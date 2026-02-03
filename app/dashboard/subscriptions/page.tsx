@@ -11,7 +11,7 @@ export default function page() {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [loadApiData, setIsLoading] = React.useState(false);
 
   useEffect(() => {
     loadSubscription(currentPage, pageSize);
@@ -64,6 +64,7 @@ export default function page() {
             initialPageSize={pageSize}
             serverSidePagination={true}
             onPageChange={handlePageChange}
+            loadApiData={loadApiData}
           />
 
         </div>

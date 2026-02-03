@@ -9,6 +9,7 @@ interface AgenciesDataTableProps {
   initialPage?: number
   initialPageSize?: number
   serverSidePagination?: boolean
+  loadApiData?: boolean
   onPageChange?: (page: number, pageSize: number) => void
 }
 
@@ -18,7 +19,8 @@ export default function SubscriptionsDataTable({
   initialPage = 0,
   initialPageSize = 10,
   serverSidePagination = false,
-  onPageChange 
+  onPageChange,
+  loadApiData,
 }: AgenciesDataTableProps) {
 
     const handleEditAgency = (plan: SubscriptionPlan) => {
@@ -35,6 +37,7 @@ export default function SubscriptionsDataTable({
                 columns={SubscriptionPlanColumns}
                 title="Subscription Plan"
                 description="Manage your Subscription Plan"
+                loadApiData={loadApiData}
                 // addButtonLabel=""
                 // onAddNew={handleAddAgency}
                 // onpenViewModal={}
