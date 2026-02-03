@@ -17,16 +17,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
         // Get current session
         const getSession = async () => {
             const { data } = await supabase.auth.getSession();
-            console.log(data);
+            // console.log(data);
 
             setSession(data.session);
             setLoading(false);
 
             // Redirect if not admin or superadmin
-            //   const role = data.session?.user?.role ?? "";
-            //   if (!["admin", "superadmin"].includes(role)) {
-            //     router.replace("/");
-            //   }
+              const role = data.session?.user?.app_metadata.role ?? "";
+              if (!["admin", "superadmin"].includes(role)) {
+                router.replace("/");
+              }
             if (session) {
                 router.replace("/");
             }
@@ -38,10 +38,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const { data: authListener } = supabase.auth.onAuthStateChange(
             (event, currentSession) => {
                 setSession(currentSession);
-                // const role = currentSession?.user?.role ?? "";
-                // if (!["admin", "superadmin", "authenticated"].includes(role)) {
-                //   router.replace("/");
-                // }
+                const role = currentSession?.user?.app_metadata.role ?? "";
+                if (!["admin", "superadmin", "authenticated"].includes(role)) {
+                  router.replace("/");
+                }
                 if (session) {
                     router.replace("/");
                 }

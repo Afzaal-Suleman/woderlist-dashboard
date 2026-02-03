@@ -1,15 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 export default function LoginPage() {
+
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+ useEffect(() => {
+  const checkAccess = async () => {
+    const { data } = await supabase.auth.getSession();
+    const session = data.session;
 
+    if (session) {
+      router.replace("/dashboard");
+      return;
+    }
+
+    setLoading(false);
+  };
+
+  checkAccess();
+}, []);
   const handleLogin = async () => {
     setLoading(true);
     setError("");

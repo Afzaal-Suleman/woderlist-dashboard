@@ -13,7 +13,7 @@ export default function Page() {
   useEffect(() => {
     const fetchSession = async () => {
       const { data } = await supabase.auth.getSession();
-      console.log("Current session:", data.session);
+      // console.log("Current session:", data.session);
       setSession(data.session);
     };
 
