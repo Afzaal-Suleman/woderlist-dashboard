@@ -76,8 +76,8 @@ const data = {
       icon: IconPackage,
     },
     {
-      title: "Whishlist",
-      url: "/dashboard/whishlist",
+      title: "Wishlist",
+      url: "/dashboard/wishlist",
       icon: IconHeart,
     },
     {
