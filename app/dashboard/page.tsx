@@ -10,17 +10,17 @@ import data from "./data.json";
 export default function Page() {
   const [session, setSession] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      // console.log("Current session:", data.session);
-      setSession(data.session);
-    };
+  // useEffect(() => {
+  //   const fetchSession = async () => {
+  //     const { data } = await supabase.auth.getSession();
+  //     // console.log("Current session:", data.session);
+  //     setSession(data.session);
+  //   };
 
-    fetchSession();
-  }, []);
+  //   fetchSession();
+  // }, []);
 
-  if (!session) return <div>Loading...</div>;
+  // if (!session) return <div>Loading...</div>;
 
   return (
     <div className="flex flex-1 flex-col">

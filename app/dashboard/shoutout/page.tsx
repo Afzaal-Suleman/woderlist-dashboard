@@ -5,10 +5,11 @@ import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import { useState, useEffect } from "react";
 import { ShoutoutDataTable } from "@/components/data-table/shoutout/ShoutoutDataTable";
-import { fetchShoutout } from "@/server/action/fetchShoutout";
+import { fetchShoutout } from "@/server/fetch/fetchShoutout";
+import { Shoutout } from "@/types/shoutout";
 
 export default function Page() {
-  const [shoutout, setShoutout] = useState<any>([]);
+  const [shoutout, setShoutout] = useState<Shoutout[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -33,9 +34,10 @@ export default function Page() {
 
   // For server-side pagination
   const handlePageChange = async (page: number, perPage: number) => {
-    setCurrentPage(page);
+    const oneBasedPage = page + 1; 
+    setCurrentPage(oneBasedPage);
     setPageSize(perPage);
-    await loadShoutout(page, perPage);
+    await loadShoutout(oneBasedPage, perPage);
   };
 
   return (
@@ -46,24 +48,26 @@ export default function Page() {
           <div className="px-4 lg:px-6">
             {/* <ChartAreaInteractive /> */}
           </div>
-          
+
           {/* Option 1: Client-side pagination (default) */}
-          {/* <AgenciesDataTable 
-            data={agencies} 
+          {/* <ShoutoutDataTable 
+            data={shoutout} 
             totalCount={totalCount}
           /> */}
-          
+
           {/* Option 2: Server-side pagination */}
-          
-          <ShoutoutDataTable 
-            data={shoutout} 
+
+          <ShoutoutDataTable
+            title="Shoutout"
+            description="Manage your shoutout"
+            data={shoutout}
             totalCount={totalCount}
             initialPage={currentPage - 1}
             initialPageSize={pageSize}
             serverSidePagination={true}
             onPageChange={handlePageChange}
           />
-         
+
         </div>
       </div>
     </div>

@@ -2,7 +2,7 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
 import SubscriptionsDataTable from '@/components/data-table/subscriptions/SubscriptionsDataTable'
-import { fetchSubscriptionPlan } from '@/server/action/fetchSubscriptionPlan';
+import { fetchSubscriptionPlan } from '@/server/fetch/fetchSubscriptionPlan';
 import { SubscriptionPlan } from '@/types/subscriptionPlan';
 
 

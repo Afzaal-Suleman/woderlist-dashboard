@@ -37,7 +37,7 @@ import {
   IconExternalLink,
 } from "@tabler/icons-react"
 import { formatDate } from "@/utils/formatDate"
-import { fetchAgencyProfileByUserId } from "@/server/action/fetchAgencies"
+import { fetchAgencyProfileByUserId } from "@/server/fetch/fetchAgencies"
 import { AgencyProfile } from "@/types/packages"
 import { getStatusConfig } from "@/utils/agencyStatusOptions"
 
@@ -74,7 +74,7 @@ export function AgencyProfileViewModal({
     setLoading(true)
     setError(null)
     try {
-      const { data, error } = await fetchAgencyProfileByUserId(1, 1, userId)
+      const { data, error } = await fetchAgencyProfileByUserId(userId)
       console.log(data, "data");
       
       const d = data ?  data[0] : null

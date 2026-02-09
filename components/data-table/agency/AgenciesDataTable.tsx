@@ -17,6 +17,7 @@ import {
 
 import { changeStatusWithNotification } from "@/server/status-change"
 import { statusConfig, getStatusConfig } from "@/utils/agencyStatusOptions"
+import { deleteData } from "@/server/delete/deleteData"
 
 export type AgencyFromDB = {
   id: number
@@ -78,7 +79,6 @@ export function AgenciesDataTable({
   const [agencies, setAgencies] = useState<AgencyForTable[]>(
     data.map(agency => ({
       ...agency,
-      status: agency.email ? "Active" : "Inactive",
       target: "0",
       limit: "Unlimited",
       reviewer: "Not assigned"
@@ -90,7 +90,6 @@ export function AgenciesDataTable({
     setAgencies(
       data.map(agency => ({
         ...agency,
-        status: agency.email ? "Active" : "Inactive",
         target: "0",
         limit: "Unlimited",
         reviewer: "Not assigned"
@@ -117,7 +116,8 @@ export function AgenciesDataTable({
     console.log("Edit agency:", agency)
   }
 
-  const handleDeleteAgency = (agency: AgencyForTable) => {
+  const handleDeleteAgency = async(agency: AgencyForTable) => {
+    // await deleteData()
     setAgencies(agencies.filter(a => a.id !== agency.id))
   }
 
@@ -161,7 +161,7 @@ export function AgenciesDataTable({
         id: statusModal.agency.id.toString(),
         newStatus: statusModal.newStatus,
         statusColumn: "status",
-        equalCol: "user_id",
+        equalCol: "id",
         // Additional data if needed
         // additionalData: {
         //   updated_by: "current_user_id", // Add user ID if needed
@@ -273,7 +273,7 @@ export function AgenciesDataTable({
         description="Manage your travel agency partners"
         // addButtonLabel="Add Agency"
         // onAddNew={handleAddAgency}
-        onEdit={handleEditAgency}
+        // onEdit={handleEditAgency}
         onDelete={handleDeleteAgency}
         onpenViewModal={openViewModal}
 

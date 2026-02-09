@@ -5,10 +5,11 @@ import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import { useState, useEffect } from "react";
 import { PackageDataTable } from "@/components/data-table/packageComp/PackagesDataTable";
-import { fetchPackages } from "@/server/action/fetchPackages";
+import { fetchPackages } from "@/server/fetch/fetchPackages";
+import { Package } from "@/types/packages";
 
 export default function Page() {
-  const [shoutout, setShoutout] = useState<any>([]);
+  const [shoutout, setShoutout] = useState<Package[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -33,9 +34,10 @@ export default function Page() {
 
   // For server-side pagination
   const handlePageChange = async (page: number, perPage: number) => {
-    setCurrentPage(page);
+    const oneBasedPage = page + 1; // Convert 0-based to 1-based
+    setCurrentPage(oneBasedPage);
     setPageSize(perPage);
-    await loadShoutout(page, perPage);
+    await loadShoutout(oneBasedPage, perPage);
   };
 
   return (
@@ -63,6 +65,7 @@ export default function Page() {
             serverSidePagination={true}
             onPageChange={handlePageChange}
             loadApiData={loadApiData}
+            
           />
 
         </div>

@@ -76,21 +76,20 @@
 "use client"
 
 import { AgenciesDataTable } from "@/components/data-table/agency/AgenciesDataTable";
-import { fetchAgencies } from "@/server/action/fetchAgencies";
+import { fetchAgencies } from "@/server/fetch/fetchAgencies";
 import { useEffect, useState } from "react";
+import { Agency } from "@/types/agency";
 
 export default function Page() {
-  const [agencies, setAgencies] = useState<any>([]);
+  const [agencies, setAgencies] = useState<Agency[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loadApiData, setLoading] = useState(false);
 
   const loadData = async (page: number, pageSize: number) => {
-    console.log("Loading page:", page, "size:", pageSize);
     setLoading(true);
     try {
       const { data, count, error } = await fetchAgencies(page, pageSize);
       if (!error && data) {
-        console.log("Received data:", data?.length || 0, "items, count:", count);
         setAgencies(data || []);
         setTotalCount(count || 0);
       }

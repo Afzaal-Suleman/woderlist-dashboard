@@ -10,6 +10,7 @@ export interface Profile {
 export interface TravelerProfile {
   id: string;
   full_name: string;
+  email: string;
   avatar?: string;
   use_id?: string;            
   profiles?: Profile;        
@@ -23,7 +24,7 @@ export interface Shoutout {
   tags: string[];             
   created_at?: string;        
   updated_at?: string;
-  traveler_profiles?: TravelerProfile;  
+  profiles?: TravelerProfile;  
 }
 
 export type ShoutoutList = Shoutout[];

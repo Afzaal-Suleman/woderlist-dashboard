@@ -1,4 +1,6 @@
-import { supabase } from "@/lib/supabase";
+// import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
+const supabase = createClient();
 import { toast } from "sonner";
 
 export interface StatusChangeOptions {

@@ -5,10 +5,11 @@ import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import { useState, useEffect } from "react";
 import { WishlistDataTable } from "@/components/data-table/wishlist/WishlistDataTable";
-import { fetchWhishlist } from "@/server/action/fetchWhishlist";
+import { fetchWhishlist } from "@/server/fetch/fetchWhishlist";
+import { Wishlist } from "@/types/whishlist";
 
 export default function Page() {
-  const [agencies, setAgencies] = useState<any>([]);
+  const [agencies, setAgencies] = useState<Wishlist[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -21,8 +22,10 @@ export default function Page() {
   const loadAgencies = async (page: number, perPage: number) => {
     setIsLoading(true);
     try {
+      console.log(page, perPage);
+      
       const { data, count, error } = await fetchWhishlist(page, perPage);
-      console.log(data, "fetchWhishlist");
+      console.log(data, count);
       
       if (!error) {
         setAgencies(data || []);
@@ -34,10 +37,11 @@ export default function Page() {
   };
 
   // For server-side pagination
-  const handlePageChange = async (page: number, perPage: number) => {
-    setCurrentPage(page);
+   const handlePageChange = async (page: number, perPage: number) => {
+    const oneBasedPage = page + 1; 
+    setCurrentPage(oneBasedPage);
     setPageSize(perPage);
-    await loadAgencies(page, perPage);
+    await loadAgencies(oneBasedPage, perPage);
   };
 
   return (
@@ -63,8 +67,8 @@ export default function Page() {
             initialPage={currentPage - 1}
             initialPageSize={pageSize}
             serverSidePagination={true}
-            onPageChange={handlePageChange}
             loadApiData={loadApiData}
+            onPageChange={handlePageChange}
           />
          
         </div>
