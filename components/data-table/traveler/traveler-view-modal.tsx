@@ -42,7 +42,7 @@ import {
   IconMap,
 } from "@tabler/icons-react"
 import { formatDate } from "@/utils/formatDate"
-import { fetchTravelerProfileByUserId } from "@/server/action/fetchTravelers"
+import { fetchTravelerProfileByUserId } from "@/server/fetch/fetchTravelers"
 import { TravelerProfile } from "@/types/traveler"
 
 interface TravelerProfileViewModalProps {
@@ -75,7 +75,7 @@ export function TravelerProfileViewModal({
     setLoading(true)
     setError(null)
     try {
-      const { data, error } = await fetchTravelerProfileByUserId(1, 1, userId)
+      const { data, error } = await fetchTravelerProfileByUserId(userId)
       
       const d = data ?  data[0] : null
 

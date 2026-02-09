@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { useSession } from "@/components/providers/SessionProvider";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import {
@@ -9,20 +9,24 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar";
 
-
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-  const checkAccess = async () => {
-    const { data } = await supabase.auth.getSession();
-    const session = data.session;
+  const router = useRouter();
+  const { user, session, loading: authLoading } = useSession();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-    if (!session) {
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || authLoading) return;
+
+    if (!user || !session) {
       router.replace("/");
       return;
     }
@@ -34,11 +38,24 @@ const router = useRouter();
       return;
     }
 
-    setLoading(false);
-  };
+    setIsAuthorized(true);
+  }, [mounted, authLoading, user, session, router]);
 
-  checkAccess();
-}, []);
+  // Show loading while checking auth
+  if (authLoading || !mounted) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render dashboard if not authorized
+  if (!isAuthorized) {
+    return null;
+  }
 
   return (
     <SidebarProvider

@@ -5,10 +5,11 @@ import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import { useState, useEffect } from "react";
 import { TravelersDataTable } from "@/components/data-table/traveler/TravelersDataTable";
-import { fetchTravelers } from "@/server/action/fetchTravelers";
+import { fetchTravelers } from "@/server/fetch/fetchTravelers";
+import { TravelerProfileA } from "@/types/traveler";
 
 export default function Page() {
-  const [agencies, setAgencies] = useState<any>([]);
+  const [agencies, setAgencies] = useState<TravelerProfileA[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -33,9 +34,10 @@ export default function Page() {
 
   // For server-side pagination
   const handlePageChange = async (page: number, perPage: number) => {
-    setCurrentPage(page);
+    const oneBasedPage = page + 1; // Convert 0-based to 1-based
+    setCurrentPage(oneBasedPage);
     setPageSize(perPage);
-    await loadAgencies(page, perPage);
+    await loadAgencies(oneBasedPage, perPage);
   };
 
   return (

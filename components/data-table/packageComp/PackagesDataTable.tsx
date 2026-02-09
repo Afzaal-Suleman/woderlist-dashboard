@@ -97,9 +97,9 @@ export function PackageDataTable({
   }
 
   const handleDeletePackage = async (pkg: PackageForTable) => {
-    if (!confirm(`Are you sure you want to delete "${pkg.title}"?`)) {
-      return
-    }
+    // if (!confirm(`Are you sure you want to delete "${pkg.title}"?`)) {
+    //   return
+    // }
 
     setLoading(true)
     try {
@@ -271,9 +271,9 @@ export function PackageDataTable({
         columns={enhancedColumns}
         title="Travel Packages"
         description="Manage your travel packages and offers"
-        addButtonLabel="Add Package"
-        onAddNew={handleAddPackage}
-        onEdit={handleEditPackage}
+        // addButtonLabel="Add Package"
+        // onAddNew={handleAddPackage}
+        // onEdit={handleEditPackage}
         onDelete={handleDeletePackage}
         onpenViewModal={openViewModal}
         loadApiData={loadApiData}
@@ -281,7 +281,7 @@ export function PackageDataTable({
         totalCount={totalCount}
         initialPage={initialPage}
         initialPageSize={initialPageSize}
-        onPageChange={onPageChange}
+        onPageChange={onPageChange}        
       />
 
       {/* Status Change Confirmation Modal */}

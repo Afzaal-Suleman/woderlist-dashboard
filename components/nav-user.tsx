@@ -7,7 +7,7 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
-
+import { useRouter } from "next/navigation"
 import {
   Avatar,
   AvatarFallback,
@@ -28,6 +28,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+// import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 
 export function NavUser({
   user,
@@ -38,7 +40,15 @@ export function NavUser({
     avatar: string
   }
 }) {
+const supabase = createClient();
+
   const { isMobile } = useSidebar()
+  const router = useRouter()
+  const handleLogout = async ()=>{
+    await supabase.auth.signOut()
+    router.replace('/')
+    router.refresh();
+  }
 
   return (
     <SidebarMenu>
@@ -98,7 +108,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <IconLogout />
               Log out
             </DropdownMenuItem>

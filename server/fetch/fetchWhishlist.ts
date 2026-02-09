@@ -4,7 +4,6 @@ import { Wishlist } from "@/types/whishlist"
 
 import { supabase } from "@/lib/supabase";
 
-import { Agency } from "@/types/agency";
 
 export const fetchWhishlist = async (
   page: number,
@@ -16,7 +15,7 @@ export const fetchWhishlist = async (
 }> => {
   const from = (page - 1) * perPage;
   const to = from + perPage - 1;
-
+  
   const { data, count, error } = await supabase
   .from("wishlists")
   .select(`
@@ -34,8 +33,8 @@ export const fetchWhishlist = async (
   .range(from, to)
   .order("created_at", { ascending: false });
 
-
-console.log(data, count, error, "api Data");
+    console.log(data, count);
+    
 
   return { data, count, error };
 };
@@ -43,16 +42,13 @@ console.log(data, count, error, "api Data");
 
 
 export const fetchWishlistById = async (
-  page: number,
-  perPage: number,
   id:string
 ): Promise<{
   data: Wishlist[] | null;
   count: number | null;
   error: any;
 }> => {
-  const from = (page - 1) * perPage;
-  const to = from + perPage - 1;
+
 
   const { data, count, error } = await supabase
   .from("wishlists")
@@ -68,11 +64,9 @@ export const fetchWishlistById = async (
       )
     )
   `, { count: "exact" })
-  .range(from, to).eq("id", id)
   .order("created_at", { ascending: false });
 
 
-console.log(data, count, error, "api Data");
 
   return { data, count, error };
 };

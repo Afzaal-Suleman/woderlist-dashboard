@@ -28,13 +28,11 @@ export const ShoutoutColumns: ColumnDef<Shoutout>[] = [
         header: "Author Name",
         cell: ({ row }) => {
             const data: Shoutout = row.original
-            console.log(data, "traveler");
-
             return (
                 <div className="flex flex-col">
-                    <span className="font-medium">{data?.traveler_profiles?.profiles?.full_name || "Unnamed Agency"}</span>
-                    {data?.traveler_profiles && (
-                        <span className="text-xs text-muted-foreground">{data.traveler_profiles.profiles?.email}</span>
+                    <span className="font-medium">{data?.profiles?.full_name || "Unnamed Agency"}</span>
+                    {data?.profiles && (
+                        <span className="text-xs text-muted-foreground">{data.profiles?.email}</span>
                     )}
                 </div>
             )

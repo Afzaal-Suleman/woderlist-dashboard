@@ -105,3 +105,18 @@ export const fetchPackages = async (
 
   return { data: enrichedData, count, error: null };
 };
+
+
+export const fetchPackagesByIds = async (
+  ids: string[]
+): Promise<{ data: any[] | null; error: any, count:any }> => {
+  console.log(ids, "ids");
+  
+  const { data, error, count } = await supabase
+    .from("packages")
+    .select("*", { count: "exact" }).in("id", ids); 
+
+  console.log(data, error, "traveler_profiles by IDs");
+
+  return { data, count, error };
+};

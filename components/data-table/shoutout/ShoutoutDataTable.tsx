@@ -2,8 +2,10 @@
 
 import { DataTable } from "@/components/data-table"
 import { ShoutoutColumns } from "@/components/data-table/shoutout/shoutout-columns"
+import { ShoutoutViewModal } from "@/components/data-table/shoutout/shoutout-view-modal"
 import { useState, useEffect } from "react"
 import { Shoutout } from "@/types/shoutout"
+import { deleteData } from "@/server/delete/deleteData"
 
 // Updated type: include nested traveler_profiles and profiles
 export type AgencyForTable = Shoutout & {
@@ -17,32 +19,41 @@ export type AgencyForTable = Shoutout & {
 
 interface AgenciesDataTableProps {
   data: Shoutout[]
+  title?: string
+  description?: string
   totalCount?: number
   initialPage?: number
   initialPageSize?: number
   serverSidePagination?: boolean
+  onRowClick?:(item: any) => void
   onPageChange?: (page: number, pageSize: number) => void
+  loadApiData?:boolean
 }
 
-export function ShoutoutDataTable({ 
-  data, 
+export function ShoutoutDataTable({
+  data,
+  title,
+  description,
   totalCount = 0,
   initialPage = 0,
   initialPageSize = 10,
   serverSidePagination = false,
-  onPageChange 
+  onPageChange,
+  onRowClick,
+  loadApiData
 }: AgenciesDataTableProps) {
+
+  const [viewModal, setViewModal] = useState<{
+    isOpen: boolean
+    shoutout: Shoutout | null
+  }>({
+    isOpen: false,
+    shoutout: null
+  })
 
   const mapData = (data: Shoutout[]): AgencyForTable[] => {
     return data.map(agency => ({
       ...agency,
-      // Compute status based on email or nested data
-      status: agency.traveler_profiles?.full_name ? "Active" : "Inactive",
-      target: "0",
-      limit: "Unlimited",
-      reviewer: "Not assigned",
-      travelerName: agency.traveler_profiles?.full_name || "Unknown",
-      profileCity: agency.traveler_profiles?.profiles?.city || "Unknown"
     }))
   }
 
@@ -57,27 +68,52 @@ export function ShoutoutDataTable({
     console.log("Edit agency:", agency)
   }
 
-  const handleDeleteAgency = (agency: AgencyForTable) => {
+  const handleDeleteAgency = async(agency: AgencyForTable) => {
+    // await deleteData()
     setShoutout(shoutout.filter(a => a.id !== agency.id))
   }
 
-  return (
-    <DataTable<AgencyForTable>
-      data={shoutout}
-      columns={ShoutoutColumns}
-      title="Travel Agencies"
-      description="Manage your travel agency partners"
-      addButtonLabel="Add Agency"
-      // onAddNew={handleAddAgency}
-      onEdit={handleEditAgency}
-      onDelete={handleDeleteAgency}
+  const handleViewShoutout = (item: AgencyForTable) => {
+    setViewModal({
+      isOpen: true,
+      shoutout: item as Shoutout
+    })
+  }
 
-      // Pagination props
-      serverSidePagination={serverSidePagination}
-      totalCount={totalCount}
-      initialPage={initialPage}
-      initialPageSize={initialPageSize}
-      onPageChange={onPageChange}
-    />
+  const closeViewModal = () => {
+    setViewModal({
+      isOpen: false,
+      shoutout: null
+    })
+  }
+
+  return (
+    <>
+      <DataTable<AgencyForTable>
+        data={shoutout}
+        columns={ShoutoutColumns}
+        title={title}
+        description={description}
+        addButtonLabel="Add Agency"
+        loadApiData={loadApiData}
+        // onAddNew={handleAddAgency}
+        // onEdit={handleEditAgency}
+        onDelete={handleDeleteAgency}
+        onRowClick={onRowClick}
+        onpenViewModal={handleViewShoutout}
+        // Pagination props
+        serverSidePagination={serverSidePagination}
+        totalCount={totalCount}
+        initialPage={initialPage}
+        initialPageSize={initialPageSize}
+        onPageChange={onPageChange}
+      />
+
+      <ShoutoutViewModal
+        isOpen={viewModal.isOpen}
+        onClose={closeViewModal}
+        shoutout={viewModal.shoutout}
+      />
+    </>
   )
 }

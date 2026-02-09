@@ -46,7 +46,7 @@ import {
 } from "@tabler/icons-react"
 import { formatDate } from "@/utils/formatDate"
 import { formatCurrency } from "@/utils/formatCurrency"
-import { fetchWishlistById } from "@/server/action/fetchWhishlist"
+import { fetchWishlistById } from "@/server/fetch/fetchWhishlist"
 import { Wishlist } from "@/types/whishlist"
 import { getStatusConfig } from "@/utils/wishlistStatusOptions"
 
@@ -84,7 +84,7 @@ export function WishlistViewModal({
     setLoading(true)
     setError(null)
     try {
-      const { data, error } = await fetchWishlistById(1, 1, wishlistId)
+      const { data, error } = await fetchWishlistById(wishlistId)
       const d = data ?  data[0] : null
       
       if (error) {

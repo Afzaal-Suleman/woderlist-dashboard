@@ -12,6 +12,7 @@ import {
   type DragEndEvent,
   type UniqueIdentifier,
 } from "@dnd-kit/core"
+
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   arrayMove,
@@ -80,6 +81,23 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+// Add this hook at the top of the file (outside the component)
+function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = React.useState(value)
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedValue(value)
+    }, delay)
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [value, delay])
+
+  return debouncedValue
+}
+
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: UniqueIdentifier }) {
   const { attributes, listeners } = useSortable({
@@ -100,10 +118,16 @@ function DragHandle({ id }: { id: UniqueIdentifier }) {
   )
 }
 
-function DraggableRow<T>({ row }: { row: Row<T> }) {
+function DraggableRow<T>({ row, onRowClick }: { row: Row<T>, onRowClick?: (item: T) => void }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.id,
   })
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (onRowClick) {
+      onRowClick(row.original)
+    }
+  }
 
   return (
     <TableRow
@@ -115,6 +139,7 @@ function DraggableRow<T>({ row }: { row: Row<T> }) {
         transform: CSS.Transform.toString(transform),
         transition: transition,
       }}
+      onClick={handleClick}
     >
       {row.getVisibleCells().map((cell) => (
         <TableCell key={cell.id}>
@@ -132,14 +157,22 @@ interface DataTableProps<T extends { id: UniqueIdentifier }> {
   title?: string
   description?: string
   enableDragAndDrop?: boolean
-  loadApiData?:boolean
+  loadApiData?: boolean
   enableColumnSelection?: boolean
   onAddNew?: () => void
   onEdit?: (item: T) => void
   onDelete?: (item: T) => void
   onpenViewModal?: (item: T) => void
   addButtonLabel?: string
-  
+  onRowClick?: (item: T) => void;
+  // filter
+  enableFilter?: boolean
+
+  // Search props
+  enableSearch?: boolean
+  searchPlaceholder?: string
+  searchColumns?: string[] // Optional: specify which columns to search in
+  onSearch?: (searchTerm: string) => void // For server-side search
   // Pagination props
   serverSidePagination?: boolean
   totalCount?: number
@@ -151,8 +184,8 @@ interface DataTableProps<T extends { id: UniqueIdentifier }> {
 export function DataTable<T extends { id: UniqueIdentifier }>({
   data: initialData,
   columns,
-  title = "Data",
-  description = "Manage your data",
+  title = "",
+  description = "",
   enableDragAndDrop = true,
   enableColumnSelection = true,
   onAddNew,
@@ -161,7 +194,13 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
   onpenViewModal,
   addButtonLabel = "Add Item",
   loadApiData,
-  
+  enableFilter = false,
+  onRowClick,
+  // Search props
+  enableSearch = false,
+  searchPlaceholder = "Search...",
+  searchColumns,
+  onSearch,
   // Pagination props
   serverSidePagination = false,
   totalCount = 0,
@@ -169,6 +208,10 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
   initialPageSize = 10,
   onPageChange,
 }: DataTableProps<T>) {
+
+  const [searchTerm, setSearchTerm] = React.useState("")
+  const debouncedSearchTerm = useDebounce(searchTerm, 300)
+
   const [data, setData] = React.useState(() => initialData)
   const [rowSelection, setRowSelection] = React.useState({})
   const [columnVisibility, setColumnVisibility] =
@@ -176,15 +219,17 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     []
   )
-  const [sorting, setSorting] = React.useState<SortingState>([])
+
   
+  const [sorting, setSorting] = React.useState<SortingState>([])
+
   // Simple pagination state
   const [pageIndex, setPageIndex] = React.useState(initialPage)
   const [pageSize, setPageSize] = React.useState(initialPageSize)
-  
+
   // State for server-side loading
   const [isLoading, setIsLoading] = React.useState(false)
-  
+
   const sortableId = React.useId()
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
@@ -203,7 +248,7 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
       if (serverSidePagination && onPageChange) {
         setIsLoading(true)
         try {
-          await onPageChange(newPageIndex + 1, newPageSize)
+          await onPageChange(newPageIndex, newPageSize)
           setPageIndex(newPageIndex)
           setPageSize(newPageSize)
         } finally {
@@ -217,35 +262,7 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
   // Prepare columns
   const columnsWithFeatures = React.useMemo(() => {
     const cols = [...columns]
-    
-    // Add checkbox column
-    cols.unshift({
-      id: "select",
-      header: ({ table }: { table: any }) => (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={
-              table.getIsAllPageRowsSelected() ||
-              (table.getIsSomePageRowsSelected() && "indeterminate")
-            }
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
-          />
-        </div>
-      ),
-      cell: ({ row }: { row: Row<T> }) => (
-        <div className="flex items-center justify-center">
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        </div>
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    })
-    
+
     // Add drag handle if enabled
     if (enableDragAndDrop) {
       cols.unshift({
@@ -256,7 +273,7 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
         enableHiding: false,
       })
     }
-    
+
     // Add actions column
     cols.push({
       id: "actions",
@@ -267,48 +284,98 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
               variant="ghost"
               className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
               size="icon"
+              onClick={(e) => e.stopPropagation()}
             >
               <IconDotsVertical />
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem onClick={() => onEdit?.(row.original)}>
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onpenViewModal?.(row.original)}>
-              view
-            </DropdownMenuItem>
-            {/* <DropdownMenuItem>Make a copy</DropdownMenuItem> */}
-            {/* <DropdownMenuItem>Favorite</DropdownMenuItem> */}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => onDelete?.(row.original)}
-            >
-              Delete
-            </DropdownMenuItem>
+            {onEdit && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit?.(row.original)
+                }}
+              >
+                Edit
+              </DropdownMenuItem>
+            )}
+            {onpenViewModal && (
+              <DropdownMenuItem
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onpenViewModal?.(row.original)
+                }}
+              >
+                View
+              </DropdownMenuItem>
+            )}
+            {onEdit && onpenViewModal && <DropdownMenuSeparator />}
+            {onDelete && (
+              <DropdownMenuItem
+                className="text-red-600 focus:text-red-600"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete?.(row.original)
+                }}
+              >
+                Delete
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),
     })
-    
-    return cols
-  }, [columns, enableDragAndDrop, onEdit, onDelete])
 
-  // Calculate paginated data for client-side
-  const paginatedData = React.useMemo(() => {
-    if (serverSidePagination) {
+    return cols
+  }, [columns, enableDragAndDrop, onEdit, onDelete, onpenViewModal])
+
+  // Add search logic after your state declarations
+  React.useEffect(() => {
+    if (serverSidePagination && onSearch) {
+      // For server-side: call the search callback
+      setIsLoading(true)
+      onSearch(debouncedSearchTerm)
+      setIsLoading(false)
+    }
+  }, [debouncedSearchTerm, serverSidePagination, onSearch])
+
+  // Filter data for client-side search
+  const filteredData = React.useMemo(() => {
+    if (!enableSearch || !debouncedSearchTerm || serverSidePagination) {
       return data
     }
-    const start = pageIndex * pageSize
-    const end = start + pageSize
-    return data.slice(start, end)
-  }, [data, pageIndex, pageSize, serverSidePagination])
 
-  // Create table instance
+    const term = debouncedSearchTerm.toLowerCase()
+
+    return data.filter((item) => {
+      // If specific columns are provided, search only in those
+      if (searchColumns && searchColumns.length > 0) {
+        return searchColumns.some((column) => {
+          const value = item[column as keyof T]
+          return value?.toString().toLowerCase().includes(term)
+        })
+      }
+
+      // Otherwise search in all string values
+      return Object.values(item).some((value) => {
+        return value?.toString().toLowerCase().includes(term)
+      })
+    })
+  }, [data, debouncedSearchTerm, enableSearch, serverSidePagination, searchColumns])
+
+
+  const tableData = React.useMemo(() => {
+  if (serverSidePagination) return data
+  return enableSearch && debouncedSearchTerm ? filteredData : data
+}, [data, filteredData, enableSearch, debouncedSearchTerm, serverSidePagination])
+
+
+  const totalRowCount = serverSidePagination ? totalCount : (enableSearch && debouncedSearchTerm ? filteredData.length : data.length)
+
   const table = useReactTable({
-    data: paginatedData,
+    data: tableData,
     columns: columnsWithFeatures,
     state: {
       sorting,
@@ -328,16 +395,15 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
     onColumnVisibilityChange: setColumnVisibility,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    ...(serverSidePagination ? {} : { getPaginationRowModel: getPaginationRowModel() }),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    
-    // Manual pagination control
+
+    // Manual pagination control for server-side only
     manualPagination: serverSidePagination,
-    pageCount: serverSidePagination 
-      ? Math.ceil(totalCount / pageSize) 
-      : Math.ceil(data.length / pageSize),
+    pageCount: serverSidePagination ? Math.ceil(totalRowCount / pageSize) : undefined,
+    rowCount: serverSidePagination ? totalRowCount : undefined,
   })
 
   // Handle drag and drop
@@ -385,11 +451,9 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
   }
 
   const handleLastPage = () => {
-    const totalPages = serverSidePagination 
-      ? Math.ceil(totalCount / pageSize) 
-      : Math.ceil(data.length / pageSize)
+    const totalPages = Math.ceil(totalRowCount / pageSize)
     const lastPageIndex = Math.max(0, totalPages - 1)
-    
+
     if (serverSidePagination) {
       handleServerPageChange(lastPageIndex, pageSize)
     } else {
@@ -400,7 +464,7 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
   // Handle rows per page change
   const handleRowsPerPageChange = (value: string) => {
     const newPageSize = Number(value)
-    
+
     if (serverSidePagination) {
       // Reset to first page when changing page size
       handleServerPageChange(0, newPageSize)
@@ -412,11 +476,11 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
 
   // Calculate if buttons should be enabled
   const totalPages = serverSidePagination 
-    ? Math.ceil(totalCount / pageSize) 
-    : Math.ceil(data.length / pageSize)
-  
+    ? Math.ceil(totalRowCount / pageSize)
+    : Math.ceil(table.getFilteredRowModel().rows.length / pageSize)
+
   const canPreviousPage = pageIndex > 0 && !isLoading
-  const canNextPage = pageIndex < totalPages - 1 && !isLoading
+  const canNextPage = pageIndex < totalPages - 1 && !isLoading && totalPages > 0
 
   return (
     <div className="w-full flex-col justify-start gap-6">
@@ -426,6 +490,40 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
           <p className="text-sm text-muted-foreground">{description}</p>
         </div>
         <div className="flex items-center gap-2">
+          {enableSearch && (
+            <div className="relative">
+              <Input
+                placeholder={searchPlaceholder}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full lg:w-64"
+                disabled={isLoading}
+              />
+              {searchTerm && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+                  onClick={() => setSearchTerm("")}
+                >
+                  ✕
+                </Button>
+              )}
+            </div>
+          )}
+          {enableFilter && (
+            <select
+              // value={value}
+              // onChange={onChange}
+              className={" bg-transparent border border-gray-300 rounded-md w-28 text-center font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:border-gray-800 cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-all duration-200"}
+            >
+              {[{ value: "ali", label: "pending" }].map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          )}
           {enableColumnSelection && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -458,15 +556,17 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
               </DropdownMenuContent>
             </DropdownMenu>
           )}
+
           {onAddNew && (
             <Button variant="outline" size="sm" onClick={onAddNew}>
               <IconPlus />
               <span className="hidden lg:inline">{addButtonLabel}</span>
             </Button>
           )}
+
         </div>
       </div>
-      
+
       <div className="flex flex-col gap-4 overflow-auto px-4 lg:px-6">
         <div className="overflow-hidden rounded-lg border">
           {enableDragAndDrop ? (
@@ -486,9 +586,9 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext()
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
                         </TableHead>
                       ))}
                     </TableRow>
@@ -510,7 +610,7 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
                       strategy={verticalListSortingStrategy}
                     >
                       {table.getRowModel().rows.map((row) => (
-                        <DraggableRow key={row.id} row={row} />
+                        <DraggableRow key={row.id} row={row} onRowClick={onRowClick} />
                       ))}
                     </SortableContext>
                   ) : (
@@ -536,9 +636,9 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                       </TableHead>
                     ))}
                   </TableRow>
@@ -559,6 +659,8 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
                     <TableRow
                       key={row.id}
                       data-state={row.getIsSelected() && "selected"}
+                      onClick={() => onRowClick?.(row.original)}
+                      className="cursor-pointer hover:bg-muted/50"
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id}>
@@ -584,12 +686,18 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
             </Table>
           )}
         </div>
-        
+
         {/* Pagination Controls */}
         <div className="flex items-center justify-between px-4">
           <div className="text-muted-foreground hidden flex-1 text-sm lg:flex">
-            {table.getFilteredSelectedRowModel().rows.length} of{" "}
-            {serverSidePagination ? totalCount : data.length} row(s) selected.
+            {/* {table.getFilteredSelectedRowModel().rows.length} 
+            of{" "}
+            {totalRowCount} row(s) selected. */}
+            {enableSearch && searchTerm && !serverSidePagination && (
+              <span className="ml-2">
+                (Found {filteredData.length} results)
+              </span>
+            )}
           </div>
           <div className="flex w-full items-center gap-8 lg:w-fit">
             {/* Rows per page selector */}
@@ -605,7 +713,7 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
                   <SelectValue placeholder={pageSize.toString()} />
                 </SelectTrigger>
                 <SelectContent side="top">
-                  {[10, 20, 30, 40, 50].map((size) => (
+                  {[5, 10, 20, 40, 50].map((size) => (
                     <SelectItem key={size} value={size.toString()}>
                       {size}
                     </SelectItem>
@@ -613,12 +721,12 @@ export function DataTable<T extends { id: UniqueIdentifier }>({
                 </SelectContent>
               </Select>
             </div>
-            
+
             {/* Page info */}
             <div className="flex w-fit items-center justify-center text-sm font-medium">
               Page {pageIndex + 1} of {totalPages || 1}
             </div>
-            
+
             {/* Navigation buttons */}
             <div className="ml-auto flex items-center gap-2 lg:ml-0">
               <Button

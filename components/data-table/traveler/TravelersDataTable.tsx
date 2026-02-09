@@ -1,11 +1,12 @@
 "use client"
 
 import { DataTable } from "@/components/data-table"
-import { agencyColumns } from "@/components/data-table/agency/agency-columns"
+import { travelerColumns } from "./traveler-columns"
 import { useState, useEffect } from "react"
-import { Traveler } from "@/types/traveler"
+import { TravelerProfileA } from "@/types/traveler"
 import { TravelerProfileViewModal } from "./traveler-view-modal"
-export type TravelerForTable = Traveler & {
+import { deleteData } from "@/server/delete/deleteData"
+export type TravelerForTable = TravelerProfileA & {
   status?: string
   target?: string
   limit?: string
@@ -13,7 +14,7 @@ export type TravelerForTable = Traveler & {
 }
 
 interface TravelerDataTableProps {
-  data: Traveler[]
+  data: TravelerProfileA[]
   totalCount?: number
   initialPage?: number
   initialPageSize?: number
@@ -42,7 +43,7 @@ export function TravelersDataTable({
   const [travelers, setTravelers] = useState<TravelerForTable[]>(
     data.map(agency => ({
       ...agency,
-      status: agency.email ? "Active" : "Inactive",
+      status: agency.status ? "Active" : "Inactive",
       target: "0",
       limit: "Unlimited",
       reviewer: "Not assigned"
@@ -54,7 +55,7 @@ export function TravelersDataTable({
     setTravelers(
       data.map(agency => ({
         ...agency,
-        status: agency.email ? "Active" : "Inactive",
+        status: agency.status ? "Active" : "Inactive",
         target: "0",
         limit: "Unlimited",
         reviewer: "Not assigned"
@@ -63,18 +64,18 @@ export function TravelersDataTable({
   }, [data])
 
   const handleAddAgency = () => {
-    const newAgency: TravelerForTable = {
-      id: Date.now(),
-      created_at: new Date().toISOString(),
-      email: "new@agency.com",
-      full_name: "New Agency",
-      role: "traveler",
-      status: "Active",
-      target: "0",
-      limit: "Unlimited",
-      reviewer: "Not assigned"
-    }
-    setTravelers([...travelers, newAgency])
+    // const newAgency: TravelerForTable = {
+    //   // id: Date.now(),
+    //   // created_at: new Date().toISOString(),
+    //   // email: "new@agency.com",
+    //   // full_name: "New Agency",
+    //   // role: "traveler",
+    //   // status: "Active",
+    //   // target: "0",
+    //   // limit: "Unlimited",
+    //   // reviewer: "Not assigned"
+    // }
+    // setTravelers([...travelers, newAgency])
   }
 
   const handleEditAgency = (agency: TravelerForTable) => {
@@ -82,6 +83,7 @@ export function TravelersDataTable({
   }
 
   const handleDeleteAgency = (agency: TravelerForTable) => {
+    // await deleteData()
     setTravelers(travelers.filter(a => a.id !== agency.id))
   }
 
@@ -99,16 +101,17 @@ export function TravelersDataTable({
       userId: null
     })
   }
+  
   return (
     <div className="space-y-4">
       <DataTable<TravelerForTable>
         data={travelers}
-        columns={agencyColumns}
+        columns={travelerColumns}
         title="travelers"
         description="Manage your travel agency partners"
         // addButtonLabel="Add Travelers"
         // onAddNew={handleAddAgency}
-        onEdit={handleEditAgency}
+        // onEdit={handleEditAgency}
         onDelete={handleDeleteAgency}
         onpenViewModal={openViewModal}
         loadApiData={loadApiData}
